@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# SSL Certificates (regenerate with npm run generate-ssl)
+ssl/*.pem
+ssl/*.key
+ssl/*.crt
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+

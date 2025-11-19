@@ -1,0 +1,28 @@
+{
+  "name": "word-addin-backend",
+  "version": "1.0.0",
+  "description": "Backend server for Microsoft Word Add-in",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "generate-ssl": "node generate-ssl.js",
+    "generate-icons": "node generate-icons.js"
+  },
+  "keywords": [
+    "word",
+    "addin",
+    "office",
+    "express",
+    "https"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {}
+}
+
