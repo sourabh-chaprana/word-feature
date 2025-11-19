@@ -98,8 +98,11 @@ const InsertName = ({
   isInserting,
   status,
   isWordAvailable,
+  wordRuntimeChecked,
 }) => {
   const disabled = !formData.name.trim() || isInserting
+  const showWordWarning = wordRuntimeChecked && !isWordAvailable
+  const showWordDetecting = !wordRuntimeChecked
 
   return (
     <section className="rounded-3xl border border-slate-100 bg-white/90 p-6 shadow-lg shadow-slate-200/50 backdrop-blur-md sm:p-8">
@@ -145,10 +148,16 @@ const InsertName = ({
           ))}
         </div>
 
-        {!isWordAvailable && (
+        {showWordDetecting && (
+          <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-800">
+            Checking for the Word add-in runtime…
+          </div>
+        )}
+
+        {showWordWarning && (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
-            Word add-in runtime not detected. The “Insert Into Word” button will copy your Name field
-            so you can paste it manually.
+            Word add-in runtime not detected. Submitting will copy the Name field so you can paste it
+            manually into your document.
           </div>
         )}
 

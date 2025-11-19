@@ -104,22 +104,28 @@ const renderApp = () => {
   )
 }
 
-const boot = async () => {
-  if (typeof Office !== 'undefined' && typeof Office.onReady === 'function') {
-    try {
-      await Office.onReady()
-      console.log('Office.js initialized')
-    } catch (officeError) {
-      console.log('Office.js loaded but not in Office client (browser mode)')
-    }
-  } else {
-    console.log('Office.js not detected (running in browser)')
+const waitForOffice = async () => {
+  const office = typeof window !== 'undefined' ? window.Office : undefined
+
+  if (!office || typeof office.onReady !== 'function') {
+    console.info('Office.js not detected - rendering taskpane in browser mode')
+    return
   }
 
+  try {
+    await office.onReady()
+    console.info('Office.js initialized')
+  } catch (officeError) {
+    console.warn('Office.js failed to initialize. Falling back to browser mode.', officeError)
+  }
+}
+
+const boot = async () => {
+  await waitForOffice()
   renderApp()
 }
 
 boot().catch((error) => {
-  console.log('App initialized in browser mode')
+  console.error('Taskpane bootstrap failed, rendering fallback UI.', error)
   renderApp()
 })
