@@ -206,47 +206,44 @@ const App = () => {
     [],
   )
 
-  const resolveHost = (info) => {
-    const office = typeof Office === 'undefined' ? undefined : Office
-    const hostFromReady = info?.host
-    const hostFromContext = office?.context?.host
-    const hostFromDiagnostics = office?.context?.diagnostics?.host
-    return hostFromReady ?? hostFromContext ?? hostFromDiagnostics ?? null
-  }
-
   useEffect(() => {
+    const resolveHost = (info) => {
+      const fromInfo = info?.host
+      const fromContext = Office?.context?.host
+      const fromDiagnostics = Office?.context?.diagnostics?.host
+
+      const normalized = (fromInfo ?? fromContext ?? fromDiagnostics ?? '').toString().toLowerCase()
+      return normalized.includes('word')
+    }
+
+    const isWordApiSupported = () => {
+      if (typeof Word !== 'undefined' && typeof Word.run === 'function') {
+        return true
+      }
+
+      if (Office?.context?.requirements?.isSetSupported) {
+        try {
+          return Office.context.requirements.isSetSupported('WordApi', '1.1')
+        } catch (error) {
+          console.warn('Word API requirement check failed', error)
+        }
+      }
+
+      return false
+    }
+
     const initOffice = async () => {
-      const office = typeof Office === 'undefined' ? undefined : Office
-
       try {
-        if (!office) {
+        if (typeof Office !== 'undefined' && typeof Office.onReady === 'function') {
+          const info = await Office.onReady()
+          console.log('sourabh-----0', info)
+          const hostIsWord = resolveHost(info)
+          console.log('sourabh-----1', hostIsWord)
+          setIsWordAvailable(hostIsWord && isWordApiSupported())
+          console.log('sourabh-----2', hostIsWord && isWordApiSupported())
+        } else {
           setIsWordAvailable(false)
-          return
         }
-
-        let info = null
-        if (typeof office.onReady === 'function') {
-          try {
-            info = await office.onReady()
-          } catch (readyError) {
-            console.warn('Office.onReady failed; attempting contextual detection.', readyError)
-          }
-        }
-
-        const detectedHost = resolveHost(info)
-
-        const hostIsWord =
-          detectedHost === office?.HostType?.Word ||
-          detectedHost === 'Word' ||
-          detectedHost?.toLowerCase?.() === 'word'
-
-        const wordApiSupported =
-          !!office.context?.requirements?.isSetSupported &&
-          office.context.requirements.isSetSupported('WordApi', '1.1')
-
-        const wordGlobalAvailable = typeof Word !== 'undefined' && typeof Word.run === 'function'
-
-        setIsWordAvailable(hostIsWord && (wordApiSupported || wordGlobalAvailable))
       } catch (err) {
         console.error('Office init error:', err)
         setIsWordAvailable(false)
@@ -276,7 +273,6 @@ const App = () => {
 
   const handleInsert = useCallback(async () => {
     const trimmedName = formData.name.trim()
-    const hasWordApi = isWordAvailable || (typeof Word !== 'undefined' && typeof Word.run === 'function')
 
     if (!trimmedName) {
       setStatus({ type: 'error', message: 'Please enter a Name before inserting.' })
@@ -286,7 +282,7 @@ const App = () => {
     setIsInserting(true)
     setStatus({ type: null, message: '' })
 
-    if (hasWordApi) {
+    if (isWordAvailable) {
       try {
         await Word.run(async (context) => {
           context.document.body.insertParagraph(`Name: ${trimmedName}`, Word.InsertLocation.end)
